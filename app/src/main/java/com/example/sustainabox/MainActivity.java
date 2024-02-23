@@ -1,10 +1,13 @@
 package com.example.sustainabox;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -16,11 +19,13 @@ import android.view.View;
 import android.widget.Button;
 
 import com.example.sustainabox.databinding.ActivityMainBinding;
+import com.journeyapps.barcodescanner.ScanContract;
+import com.journeyapps.barcodescanner.ScanOptions;
 
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
-    private Button btnCam;
+    private Button btnScan;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,19 +44,35 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
 
-        btnCam = (Button) findViewById(R.id.open_qr_scanner_button);
-        btnCam.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try {
-                    Intent intent = new Intent();
-                    intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
-                    startActivity(intent);
-                } catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
-            }
+        btnScan = findViewById(R.id.open_qr_scanner_button);
+        btnScan.setOnClickListener(v->
+        {
+            scanCode();
         });
     }
+
+    private void scanCode() {
+        ScanOptions options = new ScanOptions();
+        options.setPrompt("Press the volume up button for flash");
+        options.setBeepEnabled(true);
+        options.setOrientationLocked(true);
+        options.setCaptureActivity(CaptureAct.class);
+        qrLauncher.launch(options);
+    }
+
+    ActivityResultLauncher<ScanOptions> qrLauncher = registerForActivityResult(new ScanContract(), result ->
+    {
+        if (result.getContents() != null) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setTitle("Result");
+            builder.setMessage(result.getContents());
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener()
+            {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    dialogInterface.dismiss();
+                }
+            }).show();
+        }
+    });
 }
