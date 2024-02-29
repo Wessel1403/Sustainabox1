@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "814163251880",
+    "project_id": "sustainabox-a4b7e",
+    "storage_bucket": "sustainabox-a4b7e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:814163251880:android:39f1fcc47c34d0df0aa89d",
+        "android_client_info": {
+          "package_name": "com.example.sustainabox"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCsMj8uQ52oSJnmojNOW0DXKcmGi_YHaqA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

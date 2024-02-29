@@ -17,8 +17,11 @@ import androidx.navigation.ui.NavigationUI;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 
 import com.example.sustainabox.databinding.ActivityMainBinding;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
@@ -27,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private Button btnScan;
     private Button btnSubmit;
+    private EditText txtPost;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +53,22 @@ public class MainActivity extends AppCompatActivity {
         btnScan.setOnClickListener(v->
         {
             scanCode();
+        });
+
+        btnSubmit = findViewById(R.id.btnSubmit);
+        txtPost = findViewById(R.id.txtPost);
+
+        btnSubmit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String givenPostName = txtPost.getText().toString();
+
+                // Write a message to the database
+                FirebaseDatabase database = FirebaseDatabase.getInstance("https://sustainabox-a4b7e-default-rtdb.europe-west1.firebasedatabase.app/");
+                DatabaseReference myRef = database.getReference("message");
+
+                myRef.setValue("Hello, World!");
+            }
         });
     }
 

@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.sustainabox" />
+                  <option name="mobileSdkAppId" value="1:814163251880:android:39f1fcc47c34d0df0aa89d" />
+                  <option name="projectId" value="sustainabox-a4b7e" />
+                  <option name="projectNumber" value="814163251880" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
