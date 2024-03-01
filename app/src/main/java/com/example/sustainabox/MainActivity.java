@@ -29,8 +29,6 @@ public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
     private Button btnScan;
-    private Button btnSubmit;
-    private EditText txtPost;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,21 +53,7 @@ public class MainActivity extends AppCompatActivity {
             scanCode();
         });
 
-        btnSubmit = findViewById(R.id.btnSubmit);
-        txtPost = findViewById(R.id.txtPost);
 
-        btnSubmit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String givenPostName = txtPost.getText().toString();
-
-                // Write a message to the database
-                FirebaseDatabase database = FirebaseDatabase.getInstance("https://sustainabox-a4b7e-default-rtdb.europe-west1.firebasedatabase.app/");
-                DatabaseReference myRef = database.getReference("message");
-
-                myRef.setValue("Hello, World!");
-            }
-        });
     }
 
     private void scanCode() {

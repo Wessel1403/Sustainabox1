@@ -1,0 +1,6 @@
+<resources>
+    <string-array name="user_types">
+        <item>Customer</item>
+        <item>Shop Owner</item>
+    </string-array>
+</resources>

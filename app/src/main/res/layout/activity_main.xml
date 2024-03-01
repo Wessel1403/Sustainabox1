@@ -33,22 +33,4 @@
         app:layout_constraintVertical_bias="0.0"
         app:navGraph="@navigation/mobile_navigation" />
 
-    <Button
-        android:id="@+id/btnSubmit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Button"
-        tools:layout_editor_absoluteX="125dp"
-        tools:layout_editor_absoluteY="318dp" />
-
-    <EditText
-        android:id="@+id/txtPost"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="text"
-        android:text="Name"
-        tools:layout_editor_absoluteX="52dp"
-        tools:layout_editor_absoluteY="272dp" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>
