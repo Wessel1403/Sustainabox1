@@ -34,6 +34,7 @@ public class RegisterFragment extends AppCompatActivity {
     private EditText editTextLastName;
     private EditText editTextPhone;
     private Button buttonRegister;
+    private Button buttonLogin;
     private FirebaseAuth mAuth;
     private Spinner spinnerUserType;
     private String userType;
@@ -49,6 +50,7 @@ public class RegisterFragment extends AppCompatActivity {
         editTextLastName = findViewById(R.id.editTextLastName);
         editTextPhone = findViewById(R.id.editTextPhone);
         buttonRegister = findViewById(R.id.buttonRegister);
+        buttonLogin = findViewById(R.id.buttonLogin);
         spinnerUserType = findViewById(R.id.spinnerUserType);
 
         mAuth = FirebaseAuth.getInstance();
@@ -79,6 +81,15 @@ public class RegisterFragment extends AppCompatActivity {
                 register(email, password);
             }
         });
+
+        buttonLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(RegisterFragment.this, LoginActivity.class);
+                startActivity(intent);
+            }
+        });
+
     }
 
     private void register(final String email, String password) {

@@ -17,7 +17,7 @@
         android:id="@+id/editTextFirstName"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:layout_marginTop="150dp"
+        android:layout_marginTop="100dp"
         android:backgroundTint="@android:color/white"
         android:hint="First Name"
         android:inputType="textPersonName"
@@ -84,5 +84,17 @@
         android:text="Register"
         android:textColor="@android:color/white"
         android:background="@drawable/rounded_button" />
+
+    <Button
+        android:id="@+id/buttonLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_below="@id/buttonRegister"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:onClick="goToLoginActivity"
+        android:text="I already have an account"
+        android:textColor="@color/black"
+        android:background="@color/zxing_transparent" />
 
 </LinearLayout>

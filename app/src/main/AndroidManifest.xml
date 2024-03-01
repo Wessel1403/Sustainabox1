@@ -21,12 +21,14 @@
 
         <activity
             android:name=".ui.register.RegisterFragment"
-            android:label="Register">
+            android:label="Register"
+            android:noHistory="true">
         </activity>
 
         <activity
             android:name=".ui.LoginActivity"
-            android:label="Login">
+            android:label="Login"
+            android:noHistory="true">
         </activity>
 
         <activity
