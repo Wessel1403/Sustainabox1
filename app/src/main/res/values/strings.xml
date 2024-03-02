@@ -5,4 +5,7 @@
     <string name="title_map">Map</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
+    <string name="credit_amount">0 / 0</string>
+    <string name="qr_button_txt">"Open QR scanner"</string>
+    <string name="credit_text">"Your Credits"</string>
 </resources>

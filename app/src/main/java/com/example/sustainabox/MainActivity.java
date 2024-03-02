@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.example.sustainabox.ui.home.HomeFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -52,8 +53,6 @@ public class MainActivity extends AppCompatActivity {
         {
             scanCode();
         });
-
-
     }
 
     private void scanCode() {
