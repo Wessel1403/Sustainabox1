@@ -78,7 +78,9 @@ public class RegisterFragment extends AppCompatActivity {
             public void onClick(View v) {
                 String email = editTextEmail.getText().toString().trim();
                 String password = editTextPassword.getText().toString().trim();
-                register(email, password);
+                if(!email.isEmpty() && !password.isEmpty()) {
+                    register(email, password);
+                }
             }
         });
 
