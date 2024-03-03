@@ -59,9 +59,10 @@ public class HomeFragment extends Fragment {
 
         userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         mDatabase = FirebaseDatabase.getInstance().getReference("Users");
+
         // This needs to be changed later to get this info from database, but I can't figure out how to do that.
         totalCredits = 5;
-        updateCreditDisplay();
+        getUserCredits(mDatabase);
 
         return root;
     }
@@ -73,7 +74,6 @@ public class HomeFragment extends Fragment {
     }
 
     private void updateCreditDisplay() {
-        getUserCredits(mDatabase);
         TextView creditDisplay = binding.creditDisplayText;
         ProgressBar creditProgressBar = binding.creditProgressbar;
 
@@ -95,6 +95,7 @@ public class HomeFragment extends Fragment {
                     Log.d("firebase", String.valueOf(task.getResult().getValue()));
                     String credits = String.valueOf(task.getResult().getValue());
                     availableCredits = Integer.parseInt(credits);
+                    updateCreditDisplay();
                 }
             }
         });
