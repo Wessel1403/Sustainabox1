@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
@@ -43,6 +44,7 @@ public class HomeFragment extends Fragment {
     private int availableCredits;
     private DatabaseReference mDatabase;
     private String userId;
+    private Button btnScan;
 // ...
 
 
@@ -60,12 +62,27 @@ public class HomeFragment extends Fragment {
         userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         mDatabase = FirebaseDatabase.getInstance().getReference("Users");
 
-        // This needs to be changed later to get this info from database, but I can't figure out how to do that.
         totalCredits = 5;
         getUserCredits(mDatabase);
 
+        Button btnScan = root.findViewById(R.id.open_qr_scanner_button);
+        btnScan.setOnClickListener(v -> {
+            scanCode();
+        });
+
         return root;
     }
+    ActivityResultLauncher<ScanOptions> qrLauncher = registerForActivityResult(new ScanContract(), result -> {
+        if (result.getContents() != null) {
+            int creditsToAdd = Integer.parseInt(result.getContents());
+            updateUserCredits(creditsToAdd);
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+            builder.setTitle("Result");
+            builder.setMessage(result.getContents());
+            builder.setPositiveButton("OK", (dialogInterface, i) -> dialogInterface.dismiss()).show();
+        }
+    });
 
     @Override
     public void onDestroyView() {
@@ -73,6 +90,24 @@ public class HomeFragment extends Fragment {
         binding = null;
     }
 
+    private void updateUserCredits(int creditsToAdd) {
+        // Update the user's credits in the database
+        mDatabase.child(userId).child("credits").setValue(availableCredits + creditsToAdd)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            // Credits updated successfully
+                            availableCredits += creditsToAdd;
+                            updateCreditDisplay();
+                            Toast.makeText(getContext(), "Credits updated successfully", Toast.LENGTH_SHORT).show();
+                        } else {
+                            // Failed to update credits
+                            Toast.makeText(getContext(), "Failed to update credits", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+    }
     private void updateCreditDisplay() {
         TextView creditDisplay = binding.creditDisplayText;
         ProgressBar creditProgressBar = binding.creditProgressbar;
@@ -99,5 +134,13 @@ public class HomeFragment extends Fragment {
                 }
             }
         });
+    }
+    private void scanCode() {
+        ScanOptions options = new ScanOptions();
+        options.setPrompt("Press the volume up button for flash");
+        options.setBeepEnabled(true);
+        options.setOrientationLocked(true);
+        options.setCaptureActivity(CaptureAct.class);
+        qrLauncher.launch(options);
     }
 }

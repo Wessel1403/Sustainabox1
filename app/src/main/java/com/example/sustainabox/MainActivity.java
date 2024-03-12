@@ -47,36 +47,5 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
-
-        btnScan = findViewById(R.id.open_qr_scanner_button);
-        btnScan.setOnClickListener(v->
-        {
-            scanCode();
-        });
     }
-
-    private void scanCode() {
-        ScanOptions options = new ScanOptions();
-        options.setPrompt("Press the volume up button for flash");
-        options.setBeepEnabled(true);
-        options.setOrientationLocked(true);
-        options.setCaptureActivity(CaptureAct.class);
-        qrLauncher.launch(options);
-    }
-
-    ActivityResultLauncher<ScanOptions> qrLauncher = registerForActivityResult(new ScanContract(), result ->
-    {
-        if (result.getContents() != null) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-            builder.setTitle("Result");
-            builder.setMessage(result.getContents());
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener()
-            {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    dialogInterface.dismiss();
-                }
-            }).show();
-        }
-    });
 }
