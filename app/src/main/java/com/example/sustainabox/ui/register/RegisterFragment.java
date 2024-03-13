@@ -32,7 +32,6 @@ public class RegisterFragment extends AppCompatActivity {
     private EditText editTextPassword;
     private EditText editTextFirstName;
     private EditText editTextLastName;
-    private EditText editTextPhone;
     private Button buttonRegister;
     private Button buttonLogin;
     private FirebaseAuth mAuth;
@@ -48,7 +47,6 @@ public class RegisterFragment extends AppCompatActivity {
         editTextPassword = findViewById(R.id.editTextPassword);
         editTextFirstName = findViewById(R.id.editTextFirstName);
         editTextLastName = findViewById(R.id.editTextLastName);
-        editTextPhone = findViewById(R.id.editTextPhone);
         buttonRegister = findViewById(R.id.buttonRegister);
         buttonLogin = findViewById(R.id.buttonLogin);
         spinnerUserType = findViewById(R.id.spinnerUserType);
@@ -107,8 +105,7 @@ public class RegisterFragment extends AppCompatActivity {
                                     editTextFirstName.getText().toString().trim(),
                                     editTextLastName.getText().toString().trim(),
                                     editTextEmail.getText().toString().trim(),
-                                    userType,
-                                    editTextPhone.getText().toString().trim()
+                                    userType
                             );
 
                             FirebaseDatabase.getInstance().getReference("Users")

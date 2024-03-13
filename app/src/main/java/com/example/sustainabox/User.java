@@ -2,15 +2,14 @@ package com.example.sustainabox;
 
 public class User {
 
-    private String firstName, lastName, email, phone, userType;
+    private String firstName, lastName, email, userType;
     private int credits;
     private int containerID, numberContainers;
 
-    public User(String firstName, String lastName, String email, String userType, String phone){
+    public User(String firstName, String lastName, String email, String userType){
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
-        this.phone = phone;
         this.userType = userType;
         this.credits = 5;
         this.containerID = 0;
@@ -37,10 +36,6 @@ public class User {
 
     public String getEmail() {
         return email;
-    }
-
-    public String getPhone() {
-        return phone;
     }
 
     public void setCredits(int credits) {
