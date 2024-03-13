@@ -32,10 +32,11 @@
         android:indeterminateOnly="false"
         android:progress="100"
         android:progressDrawable="@drawable/credit_circle"
-        app:layout_constraintBottom_toTopOf="@+id/open_qr_scanner_button"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.5"/>
 
     <TextView
         android:id="@+id/credit_display_text"
@@ -52,15 +53,26 @@
 
     <Button
         android:id="@+id/open_qr_scanner_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
         android:backgroundTint="@color/green"
         android:text="@string/qr_button_txt"
         android:textColor="@android:color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.8" />
+        app:layout_constraintTop_toBottomOf="@+id/credit_progressbar" />
+
+    <Button
+        android:id="@+id/view_boxes_button"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:backgroundTint="@color/green"
+        android:text="@string/boxes_button_txt"
+        android:textColor="@android:color/white"
+        android:layout_marginTop="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/open_qr_scanner_button" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
