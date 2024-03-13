@@ -204,6 +204,8 @@ public class HomeFragment extends Fragment {
                 totalContainers = Integer.parseInt(String.valueOf(dataSnapshot.child("Users").child(userId).child("containerCount").getValue()));
                 totalCredits = availableCredits + totalContainers;
 
+                updateContainerCount();
+
                 // Update the UI
                 updateCreditDisplay();
             }
