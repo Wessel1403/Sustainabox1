@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -37,15 +38,19 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class HomeFragment extends Fragment {
 
     private FragmentHomeBinding binding;
-    private int totalCredits;
-    private int totalContainers;
-    private int availableCredits;
+    private int totalCredits = 0;
+    private int totalContainers = 0;
+    private int availableCredits = 0;
     private DatabaseReference mDatabase;
     private String userId;
     private Button btnScan;
+    private ValueEventListener dataListener;
 // ...
 
 
@@ -61,11 +66,9 @@ public class HomeFragment extends Fragment {
         homeViewModel.getQRButtonText().observe(getViewLifecycleOwner(), qrScannerButton::setText);
 
         userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        mDatabase = FirebaseDatabase.getInstance().getReference("Users");
+        mDatabase = FirebaseDatabase.getInstance().getReferenceFromUrl("https://sustainabox-a4b7e-default-rtdb.europe-west1.firebasedatabase.app/");
 
-        totalCredits = 5;
-        totalContainers = 0;
-        getUserCredits(mDatabase);
+        setDataListener();
 
         Button btnScan = root.findViewById(R.id.open_qr_scanner_button);
         btnScan.setOnClickListener(v -> {
@@ -74,6 +77,7 @@ public class HomeFragment extends Fragment {
 
         return root;
     }
+
     ActivityResultLauncher<ScanOptions> qrLauncher = registerForActivityResult(new ScanContract(), result -> {
         if (result.getContents() != null) {
             String containerId = result.getContents(); // Assuming the container ID is in the QR code content
@@ -89,6 +93,7 @@ public class HomeFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
+        mDatabase.removeEventListener(dataListener);
         super.onDestroyView();
         binding = null;
     }
@@ -125,6 +130,7 @@ public class HomeFragment extends Fragment {
         // Fetch and update the number of containers from the database
         getUserContainersCount(mDatabase);
     }
+
     // Fetch and update the number of containers from the database
     void getUserContainersCount(DatabaseReference mDatabase) {
         mDatabase.child(userId).child("associatedContainers").get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
@@ -189,27 +195,28 @@ public class HomeFragment extends Fragment {
         creditProgressBar.setProgress(percentage);
     }
 
-    //Sets available credits to current credits of user
-    void getUserCredits(DatabaseReference mDatabase) {
-        mDatabase.child(userId).child("credits").get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+    private void setDataListener() {
+        dataListener = new ValueEventListener() {
             @Override
-            public void onComplete(@NonNull Task<DataSnapshot> task) {
-                if (!task.isSuccessful()) {
-                    Log.e("firebase", "Error getting data", task.getException());
-                } else {
-                    Log.d("firebase", String.valueOf(task.getResult().getValue()));
-                    String credits = String.valueOf(task.getResult().getValue());
-                    availableCredits = Integer.parseInt(credits);
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // Done in a very scuffed manner, it just wouldn't work otherwise for some reason.
+                availableCredits = Integer.parseInt(String.valueOf(dataSnapshot.child("Users").child(userId).child("credits").getValue()));
+                totalContainers = Integer.parseInt(String.valueOf(dataSnapshot.child("Users").child(userId).child("containerCount").getValue()));
+                totalCredits = availableCredits + totalContainers;
 
-                    // Update the user's associated container count
-                    updateContainerCount();
-
-                    // Update the UI
-                    updateCreditDisplay();
-                }
+                // Update the UI
+                updateCreditDisplay();
             }
-        });
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Getting Thread failed, log a message
+                Log.w("Credits update", "something went wrong here", databaseError.toException());
+            }
+        };
+        mDatabase.addValueEventListener(dataListener);
     }
+
     private void scanCode() {
         ScanOptions options = new ScanOptions();
         options.setPrompt("Press the volume up button for flash");
