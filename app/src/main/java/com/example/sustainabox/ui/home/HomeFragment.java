@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
@@ -43,6 +44,8 @@ public class HomeFragment extends Fragment {
     private int availableCredits;
     private DatabaseReference mDatabase;
     private String userId;
+    private TextView containerCountText;
+    private int numberContainers;
 // ...
 
 
@@ -62,27 +65,19 @@ public class HomeFragment extends Fragment {
 
         // This needs to be changed later to get this info from database, but I can't figure out how to do that.
         totalCredits = 5;
+        numberContainers = 0;
         getUserCredits(mDatabase);
+
+        // Initialize containerCountText
+        containerCountText = root.findViewById(R.id.containerCountText);
 
         Button btnScan = root.findViewById(R.id.open_qr_scanner_button);
         btnScan.setOnClickListener(v -> {
             scanCode();
         });
 
-
         return root;
     }
-    ActivityResultLauncher<ScanOptions> qrLauncher = registerForActivityResult(new ScanContract(), result -> {
-        if (result.getContents() != null) {
-            String containerId = result.getContents(); // Assuming the container ID is in the QR code content
-            int creditsToAdd = 1; // You may adjust this value based on your requirements
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-            builder.setTitle("Result");
-            builder.setMessage(result.getContents());
-            builder.setPositiveButton("OK", (dialogInterface, i) -> dialogInterface.dismiss()).show();
-        }
-    });
 
     @Override
     public void onDestroyView() {
@@ -117,6 +112,7 @@ public class HomeFragment extends Fragment {
             }
         });
     }
+
     private void scanCode() {
         ScanOptions options = new ScanOptions();
         options.setPrompt("Press the volume up button for flash");
@@ -125,5 +121,56 @@ public class HomeFragment extends Fragment {
         options.setCaptureActivity(CaptureAct.class);
 
         qrLauncher.launch(options);
+    }
+
+    ActivityResultLauncher<ScanOptions> qrLauncher = registerForActivityResult(new ScanContract(), result -> {
+        if (result.getContents() != null) {
+            String containerId = result.getContents(); // Assuming the container ID is in the QR code content
+            int creditsToAdd = 1; // You may adjust this value based on your requirements
+            updateUserCredits(creditsToAdd, containerId);
+        }
+    });
+    private void updateUserCredits(int creditsToAdd, String containerId) {
+        // Update the user's credits in the database
+        mDatabase.child(userId).child("credits").setValue(availableCredits + creditsToAdd)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            // Credits updated successfully
+                            availableCredits += creditsToAdd;
+
+                            // Associate the container with the user
+                            associateContainerWithUser(containerId);
+
+                            // Update UI
+                            updateCreditDisplay();
+                            Toast.makeText(getContext(), "Credits updated successfully", Toast.LENGTH_SHORT).show();
+                        } else {
+                            // Failed to update credits
+                            Toast.makeText(getContext(), "Failed to update credits", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+    }
+
+    private void associateContainerWithUser(String containerId) {
+        // Assuming you have a "Users" node in your database
+        DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("Users");
+
+        // Associate the container with the user under a specific node
+        DatabaseReference userContainersRef = usersRef.child(userId).child("associatedContainers");
+
+        // Add the containerId under the associatedContainers node
+        userContainersRef.child(containerId).setValue(true);
+
+        // Update the box count
+        numberContainers++;
+        updateContainerCount();
+    }
+
+    private void updateContainerCount() {
+        // Update the UI with the updated box count
+        containerCountText.setText("Boxes: " + numberContainers);
     }
 }
