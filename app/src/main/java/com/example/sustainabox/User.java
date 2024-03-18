@@ -38,6 +38,7 @@ public class User {
         return email;
     }
 
+    public String getUserType() { return userType;}
     public void setCredits(int credits) {
         this.credits = credits;
     }

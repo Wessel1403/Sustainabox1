@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.sustainabox.MainActivity;
+import com.example.sustainabox.MainActivityShopOwner;
 import com.example.sustainabox.R;
 import com.example.sustainabox.SplashActivity;
 import com.example.sustainabox.ui.register.RegisterFragment;
@@ -21,6 +22,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
@@ -32,6 +34,7 @@ public class LoginActivity extends AppCompatActivity {
     private Button buttonLogin;
     private Button buttonRegister;
     private FirebaseAuth mAuth;
+    private DatabaseReference mDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +46,7 @@ public class LoginActivity extends AppCompatActivity {
         buttonLogin = findViewById(R.id.buttonLogin);
         buttonRegister = findViewById(R.id.buttonRegister);
         mAuth = FirebaseAuth.getInstance();
+        mDatabase = FirebaseDatabase.getInstance().getReferenceFromUrl("https://sustainabox-a4b7e-default-rtdb.europe-west1.firebasedatabase.app/");
 
         buttonRegister.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -72,10 +76,9 @@ public class LoginActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-
-                            startActivity(intent);
-                            finish();
+                            String userID = mAuth.getCurrentUser().getUid();
+                            Log.d("UserID", userID);
+                            updateUI(userID);
                         } else {
                             // If sign in fails, display a message to the user.
                             Toast.makeText(LoginActivity.this, "Authentication failed",
@@ -84,6 +87,30 @@ public class LoginActivity extends AppCompatActivity {
 
                     }
                 });
+    }
+
+    private void updateUI(String userID) {
+        mDatabase.child("Users").child(userID).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // Handle the data change
+                String userType = String.valueOf(dataSnapshot.child("userType").getValue());
+                Log.d("userType", userType);
+                Intent intent;
+                if (userType.equals("Shop Owner")) {
+                    intent = new Intent(LoginActivity.this, MainActivityShopOwner.class);
+                } else {
+                    intent = new Intent(LoginActivity.this, MainActivity.class);
+                }
+                startActivity(intent);
+                finish();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Handle errors
+            }
+        });
     }
 }
 
