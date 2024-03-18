@@ -155,19 +155,22 @@ public class HomeFragment extends Fragment {
     }
 
     private void associateContainerWithUser(String containerId) {
-        // Assuming you have a "Users" node in your database
         DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("Users");
+        DatabaseReference containersRef = FirebaseDatabase.getInstance().getReference("AssociatedContainers");
 
         // Associate the container with the user under a specific node
         DatabaseReference userContainersRef = usersRef.child(userId).child("associatedContainers");
-
         // Add the containerId under the associatedContainers node
         userContainersRef.child(containerId).setValue(true);
+
+        // Add the user to the container's associated user list
+        containersRef.child(containerId).setValue(userId);
 
         // Update the box count
         numberContainers++;
         updateContainerCount();
     }
+
 
     private void updateContainerCount() {
         // Update the UI with the updated box count
