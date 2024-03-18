@@ -46,6 +46,7 @@ public class HomeFragment extends Fragment {
     private String userId;
     private TextView containerCountText;
     private int numberContainers;
+    private int avaiableContainers;
 // ...
 
 
@@ -67,9 +68,10 @@ public class HomeFragment extends Fragment {
         totalCredits = 5;
         numberContainers = 0;
         getUserCredits(mDatabase);
+        getUserContainers(mDatabase);
 
         // Initialize containerCountText
-        containerCountText = root.findViewById(R.id.containerCountText);
+        //containerCountText = root.findViewById(R.id.containerCountText);
 
         Button btnScan = root.findViewById(R.id.open_qr_scanner_button);
         btnScan.setOnClickListener(v -> {
@@ -83,6 +85,11 @@ public class HomeFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+    private void updateContainerCount() {
+        TextView containerCountText = binding.containerCountText;
+        containerCountText.setText("Boxes: " + numberContainers);
     }
 
     private void updateCreditDisplay() {
@@ -112,6 +119,22 @@ public class HomeFragment extends Fragment {
             }
         });
     }
+    //Sets available containers to current containers of user
+    void getUserContainers(DatabaseReference mDatabase) {
+        mDatabase.child(userId).child("containerCount").get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DataSnapshot> task) {
+                if (!task.isSuccessful()) {
+                    Log.e("firebase", "Error getting data", task.getException());
+                } else {
+                    Log.d("firebase", String.valueOf(task.getResult().getValue()));
+                    String containers = String.valueOf(task.getResult().getValue());
+                    avaiableContainers = Integer.parseInt(containers);
+                    updateContainerCount();
+                }
+            }
+        });
+    }
 
     private void scanCode() {
         ScanOptions options = new ScanOptions();
@@ -128,8 +151,33 @@ public class HomeFragment extends Fragment {
             String containerId = result.getContents(); // Assuming the container ID is in the QR code content
             int creditsToAdd = 1; // You may adjust this value based on your requirements
             updateUserCredits(creditsToAdd, containerId);
+            updateUserContainers(creditsToAdd, containerId);
         }
     });
+    private void updateUserContainers(int creditsToAdd, String containerId) {
+        // Update the user's containers in the database
+        mDatabase.child(userId).child("containerCount").setValue(avaiableContainers + creditsToAdd)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            // Credits updated successfully
+                            avaiableContainers += creditsToAdd;
+
+                            // Associate the container with the user
+                            associateContainerWithUser(containerId);
+
+                            // Update UI
+                            updateContainerCount();
+                            Toast.makeText(getContext(), "Credits updated successfully", Toast.LENGTH_SHORT).show();
+                        } else {
+                            // Failed to update credits
+                            Toast.makeText(getContext(), "Failed to update credits", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+    }
+
     private void updateUserCredits(int creditsToAdd, String containerId) {
         // Update the user's credits in the database
         mDatabase.child(userId).child("credits").setValue(availableCredits + creditsToAdd)
@@ -139,9 +187,6 @@ public class HomeFragment extends Fragment {
                         if (task.isSuccessful()) {
                             // Credits updated successfully
                             availableCredits += creditsToAdd;
-
-                            // Associate the container with the user
-                            associateContainerWithUser(containerId);
 
                             // Update UI
                             updateCreditDisplay();
@@ -165,15 +210,5 @@ public class HomeFragment extends Fragment {
 
         // Add the user to the container's associated user list
         containersRef.child(containerId).setValue(userId);
-
-        // Update the box count
-        numberContainers++;
-        updateContainerCount();
-    }
-
-
-    private void updateContainerCount() {
-        // Update the UI with the updated box count
-        containerCountText.setText("Boxes: " + numberContainers);
     }
 }
