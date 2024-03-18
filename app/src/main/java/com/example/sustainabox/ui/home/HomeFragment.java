@@ -37,18 +37,23 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class HomeFragment extends Fragment {
 
     private FragmentHomeBinding binding;
-    private int totalCredits;
-    private int availableCredits;
-    private DatabaseReference mDatabase;
-    private String userId;
-    private TextView containerCountText;
-    private int numberContainers;
-    private int avaiableContainers;
-// ...
+    private DatabaseReference mDatabase =  FirebaseDatabase.getInstance().getReferenceFromUrl("https://sustainabox-a4b7e-default-rtdb.europe-west1.firebasedatabase.app/");
+    private ValueEventListener dataListener;
 
+    // UI
+    private TextView containerCountText;
+
+    // Variables
+    private String userId;
+    private int totalCredits = 0;
+    private int availableCredits = 0;
+    private int ownedContainerCount = 0;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -58,82 +63,31 @@ public class HomeFragment extends Fragment {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
+        // Get userID.
+        userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        // Initialize UI
+        containerCountText = root.findViewById(R.id.containerCountText);
+
         final Button qrScannerButton = binding.openQrScannerButton;
         homeViewModel.getQRButtonText().observe(getViewLifecycleOwner(), qrScannerButton::setText);
-
-        userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        mDatabase = FirebaseDatabase.getInstance().getReference("Users");
-
-        // This needs to be changed later to get this info from database, but I can't figure out how to do that.
-        totalCredits = 5;
-        numberContainers = 0;
-        getUserCredits(mDatabase);
-        getUserContainers(mDatabase);
-
-        // Initialize containerCountText
-        //containerCountText = root.findViewById(R.id.containerCountText);
 
         Button btnScan = root.findViewById(R.id.open_qr_scanner_button);
         btnScan.setOnClickListener(v -> {
             scanCode();
         });
 
+        // Setup data listener
+        setDataListener();
+
         return root;
     }
 
     @Override
     public void onDestroyView() {
+        mDatabase.removeEventListener(dataListener);
         super.onDestroyView();
         binding = null;
-    }
-
-    private void updateContainerCount() {
-        TextView containerCountText = binding.containerCountText;
-        containerCountText.setText("Boxes: " + numberContainers);
-    }
-
-    private void updateCreditDisplay() {
-        TextView creditDisplay = binding.creditDisplayText;
-        ProgressBar creditProgressBar = binding.creditProgressbar;
-
-        creditDisplay.setText(availableCredits + " / " + totalCredits);
-
-        int percentage = (int) (((float) availableCredits / (float) totalCredits) * 100);
-
-        creditProgressBar.setProgress(percentage);
-    }
-
-    //Sets available credits to current credits of user
-    void getUserCredits(DatabaseReference mDatabase) {
-        mDatabase.child(userId).child("credits").get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DataSnapshot> task) {
-                if (!task.isSuccessful()) {
-                    Log.e("firebase", "Error getting data", task.getException());
-                } else {
-                    Log.d("firebase", String.valueOf(task.getResult().getValue()));
-                    String credits = String.valueOf(task.getResult().getValue());
-                    availableCredits = Integer.parseInt(credits);
-                    updateCreditDisplay();
-                }
-            }
-        });
-    }
-    //Sets available containers to current containers of user
-    void getUserContainers(DatabaseReference mDatabase) {
-        mDatabase.child(userId).child("containerCount").get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DataSnapshot> task) {
-                if (!task.isSuccessful()) {
-                    Log.e("firebase", "Error getting data", task.getException());
-                } else {
-                    Log.d("firebase", String.valueOf(task.getResult().getValue()));
-                    String containers = String.valueOf(task.getResult().getValue());
-                    avaiableContainers = Integer.parseInt(containers);
-                    updateContainerCount();
-                }
-            }
-        });
     }
 
     private void scanCode() {
@@ -149,47 +103,63 @@ public class HomeFragment extends Fragment {
     ActivityResultLauncher<ScanOptions> qrLauncher = registerForActivityResult(new ScanContract(), result -> {
         if (result.getContents() != null) {
             String containerId = result.getContents(); // Assuming the container ID is in the QR code content
-            int creditsToAdd = 1; // You may adjust this value based on your requirements
-            updateUserCredits(creditsToAdd, containerId);
-            updateUserContainers(creditsToAdd, containerId);
+
+            updateUserCredits(-1);
+            associateContainerWithUser(containerId);
         }
     });
-    private void updateUserContainers(int creditsToAdd, String containerId) {
-        // Update the user's containers in the database
-        mDatabase.child(userId).child("containerCount").setValue(avaiableContainers + creditsToAdd)
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()) {
-                            // Credits updated successfully
-                            avaiableContainers += creditsToAdd;
 
-                            // Associate the container with the user
-                            associateContainerWithUser(containerId);
-
-                            // Update UI
-                            updateContainerCount();
-                            Toast.makeText(getContext(), "Credits updated successfully", Toast.LENGTH_SHORT).show();
-                        } else {
-                            // Failed to update credits
-                            Toast.makeText(getContext(), "Failed to update credits", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+    private void updateContainerCountDisplay() {
+        TextView containerCountText = binding.containerCountText;
+        containerCountText.setText("Boxes: " + ownedContainerCount);
     }
 
-    private void updateUserCredits(int creditsToAdd, String containerId) {
+    private void updateCreditDisplay() {
+        TextView creditDisplay = binding.creditDisplayText;
+        ProgressBar creditProgressBar = binding.creditProgressbar;
+
+        creditDisplay.setText(availableCredits + " / " + totalCredits);
+
+        int percentage = (int) (((float) availableCredits / (float) totalCredits) * 100);
+
+        creditProgressBar.setProgress(percentage);
+    }
+
+    /**
+     * Sets a listener for the data in the database.
+     * Updates availableCredits, totalCredits and owned containers whenever there is a change in the database.
+     */
+    private void setDataListener() {
+        dataListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                DataSnapshot ds = dataSnapshot.child("Users").child(userId);
+
+                // Update variables
+                availableCredits = ds.child("credits").getValue(Integer.class);
+                ownedContainerCount = (int) ds.child("associatedContainers").getChildrenCount();
+                totalCredits = availableCredits + ownedContainerCount;
+
+                // Update UI
+                updateContainerCountDisplay();
+                updateCreditDisplay();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.w("Data update error", "loadPost:onCancelled", databaseError.toException());
+            }
+        };
+        mDatabase.addValueEventListener(dataListener);
+    }
+
+    private void updateUserCredits(int creditsToAdd) {
         // Update the user's credits in the database
-        mDatabase.child(userId).child("credits").setValue(availableCredits + creditsToAdd)
+        mDatabase.child("Users").child(userId).child("credits").setValue(availableCredits + creditsToAdd)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
-                            // Credits updated successfully
-                            availableCredits += creditsToAdd;
-
-                            // Update UI
-                            updateCreditDisplay();
                             Toast.makeText(getContext(), "Credits updated successfully", Toast.LENGTH_SHORT).show();
                         } else {
                             // Failed to update credits
@@ -200,11 +170,9 @@ public class HomeFragment extends Fragment {
     }
 
     private void associateContainerWithUser(String containerId) {
-        DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("Users");
-        DatabaseReference containersRef = FirebaseDatabase.getInstance().getReference("AssociatedContainers");
+        DatabaseReference containersRef = mDatabase.child("AssociatedContainers");
+        DatabaseReference userContainersRef = mDatabase.child("Users").child(userId).child("associatedContainers");
 
-        // Associate the container with the user under a specific node
-        DatabaseReference userContainersRef = usersRef.child(userId).child("associatedContainers");
         // Add the containerId under the associatedContainers node
         userContainersRef.child(containerId).setValue(true);
 
