@@ -44,6 +44,8 @@
             android:exported="false" />
         <activity android:name=".MainActivityShopOwner" />
         <activity
+            android:name=".ShopOwnerProfileActivity" />
+        <activity
             android:name=".SplashActivity"
             android:exported="true"
             android:label="@string/app_name"
