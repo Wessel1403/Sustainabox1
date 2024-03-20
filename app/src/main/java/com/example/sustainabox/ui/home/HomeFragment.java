@@ -147,7 +147,7 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.w("Data update error", "loadPost:onCancelled", databaseError.toException());
+                Log.w("Data update error", "loadData:onCancelled", databaseError.toException());
             }
         };
         mDatabase.addValueEventListener(dataListener);

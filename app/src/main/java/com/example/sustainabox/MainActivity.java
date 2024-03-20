@@ -9,6 +9,7 @@ import com.example.sustainabox.ui.home.HomeFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.activity.result.ActivityResultLauncher;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -45,7 +46,9 @@ public class MainActivity extends AppCompatActivity {
                 R.id.navigation_home, R.id.navigation_map, R.id.navigation_profile)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
-        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null)
+            NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
     }
 }
