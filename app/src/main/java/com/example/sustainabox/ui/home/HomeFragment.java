@@ -110,8 +110,8 @@ public class HomeFragment extends Fragment {
     });
 
     private void updateContainerCountDisplay() {
-        TextView containerCountText = binding.containerCountText;
-        containerCountText.setText("Boxes: " + ownedContainerCount);
+        TextView containerCountNumber = binding.containerCountNumber;
+        containerCountNumber.setText(ownedContainerCount);
     }
 
     private void updateCreditDisplay() {
