@@ -66,11 +66,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         LatLng store4 = new LatLng(51.4398, 5.4800);
         LatLng store5 = new LatLng(51.4350, 5.4775);
 
-        mMap.addMarker(new MarkerOptions().position(store1).title("Store 1"));
-        mMap.addMarker(new MarkerOptions().position(store2).title("Store 2"));
-        mMap.addMarker(new MarkerOptions().position(store3).title("Store 3"));
-        mMap.addMarker(new MarkerOptions().position(store4).title("Store 4"));
-        mMap.addMarker(new MarkerOptions().position(store5).title("Store 5"));
+        mMap.addMarker(new MarkerOptions().position(store1).title("Jumbo, open: 08:00-20:00"));
+        mMap.addMarker(new MarkerOptions().position(store2).title("TU/e, open: 07:00 - 23:00"));
+        mMap.addMarker(new MarkerOptions().position(store3).title("Park, open: 06:00-00:00"));
+        mMap.addMarker(new MarkerOptions().position(store4).title("Centre, open: 06:00-23:00"));
+        mMap.addMarker(new MarkerOptions().position(store5).title("Museum, open: 14:00-17:00"));
 
         mMap.moveCamera(CameraUpdateFactory.newLatLng(eindhoven));
     }

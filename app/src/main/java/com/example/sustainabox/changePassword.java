@@ -31,6 +31,7 @@ public class changePassword extends AppCompatActivity {
     private Button buttonChangePassword;
     private FirebaseAuth mAuth;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
