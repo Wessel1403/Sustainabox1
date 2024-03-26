@@ -104,10 +104,25 @@ public class HomeFragment extends Fragment {
         if (result.getContents() != null) {
             String containerId = result.getContents(); // Assuming the container ID is in the QR code content
 
-            updateUserCredits(-1);
-            associateContainerWithUser(containerId);
+            checkIfCanBuy(containerId);
         }
     });
+
+    private void checkIfCanBuy(String containerID) {
+        Task<DataSnapshot> dataSnapshotTask = mDatabase.child("AssociatedContainers").child(containerID).get();
+
+        dataSnapshotTask.addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DataSnapshot> task) {
+                if (task.getResult().getValue(String.class) == null) {
+                    if (availableCredits > 0) {
+                        updateUserCredits(-1);
+                        associateContainerWithUser(containerID);
+                    }
+                }
+            }
+        });
+    }
 
     private void updateContainerCountDisplay() {
         TextView containerCountNumber = binding.containerCountNumber;
