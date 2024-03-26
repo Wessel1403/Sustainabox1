@@ -111,7 +111,7 @@ public class HomeFragment extends Fragment {
 
     private void updateContainerCountDisplay() {
         TextView containerCountNumber = binding.containerCountNumber;
-        containerCountNumber.setText(ownedContainerCount);
+        containerCountNumber.setText(String.valueOf(ownedContainerCount));
     }
 
     private void updateCreditDisplay() {
