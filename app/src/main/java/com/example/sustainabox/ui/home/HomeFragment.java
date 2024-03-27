@@ -147,13 +147,15 @@ public class HomeFragment extends Fragment {
     private void setDataListener() {
         dataListener = new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 DataSnapshot ds = dataSnapshot.child("Users").child(userId);
 
-                // Update variables
-                availableCredits = ds.child("credits").getValue(Integer.class);
-                ownedContainerCount = (int) ds.child("associatedContainers").getChildrenCount();
-                totalCredits = availableCredits + ownedContainerCount;
+                if (ds.getValue() != null) {
+                    // Update variables
+                    availableCredits = ds.child("credits").getValue(Integer.class);
+                    ownedContainerCount = (int) ds.child("associatedContainers").getChildrenCount();
+                    totalCredits = availableCredits + ownedContainerCount;
+                }
 
                 // Update UI
                 updateContainerCountDisplay();

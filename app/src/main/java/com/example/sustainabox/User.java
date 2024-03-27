@@ -4,7 +4,6 @@ public class User {
 
     private String firstName, lastName, email, userType;
     private int credits;
-    private int numberContainers;
 
     public User(String firstName, String lastName, String email, String userType){
         this.firstName = firstName;
@@ -12,14 +11,10 @@ public class User {
         this.email = email;
         this.userType = userType;
         this.credits = 5;
-        this.numberContainers = 0;
     }
 
     public int getCredits() {
         return credits;
-    }
-    public int getContainerCount() {
-        return numberContainers;
     }
 
     public String getFirstName() {
@@ -37,8 +32,5 @@ public class User {
     public String getUserType() { return userType;}
     public void setCredits(int credits) {
         this.credits = credits;
-    }
-    public void setContainerCount(int containerCount) {
-        this.numberContainers = numberContainers;
     }
 }
